@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leadership Checklist</title>
+
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #ffffff;
+    --ink: #1a1a2e;
+    --muted: #6b6b7b;
+    --accent: #1a6b5c;      /* teal — CB-safe primary */
+    --accent-light: #e0f0ed;
+    --score-poor: #c0392b;       /* red */
+    --score-soso: #e67e22;       /* orange */
+    --score-good: #2980b9;       /* blue */
+    --score-excellent: #1a6b5c;  /* teal */
+    --border: #ddd8ce;
+    --btn-hover: #134f44;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* ---- Progress bar ---- */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ---- Card ---- */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px 36px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: var(--accent);
+  }
+
+  .q-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .q-text-en {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .q-text-ja {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+
+  /* ---- Scale labels ---- */
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  /* ---- Likert buttons ---- */
+  .likert {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+  .likert-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 72px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: transparent;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .likert-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    transform: translateY(-2px);
+  }
+  .likert-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26,107,92,0.3);
+  }
+
+  /* ---- Nav buttons ---- */
+  .nav {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+  .btn {
+    padding: 12px 28px;
+    border-radius: 99px;
+    border: none;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 2px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--muted); }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--btn-hover); }
+  .btn-primary:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  /* ---- Result page ---- */
+  .result-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .result-title-en {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 28px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .result-title-ja {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .score-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 28px 0;
+  }
+  .score-ring {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 6px solid;
+    transition: border-color 0.5s;
+  }
+  .score-ring .score-num {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 48px;
+    line-height: 1;
+  }
+  .score-ring .score-denom {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .eval-badge {
+    display: inline-block;
+    padding: 6px 20px;
+    border-radius: 99px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+  .eval-ja {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  /* Score bar chart */
+  .score-breakdown {
+    margin-bottom: 24px;
+  }
+  .breakdown-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  .breakdown-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .breakdown-label {
+    flex: 1;
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .breakdown-bar-wrap {
+    width: 80px;
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .breakdown-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+  .breakdown-score {
+    width: 28px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  /* scale bar at bottom */
+  .eval-scale {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .scale-segment {
+    flex: 1;
+    border-radius: 6px;
+    height: 8px;
+    position: relative;
+  }
+  .scale-segment-label {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .scale-indicator {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+
+  .btn-retry {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  /* Fade transition */
+  .page { animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- JS renders here -->
+</div>
+
+<script>
+const questions = [
+  { en: "If you lead a group, you set clear group goals and share them with members." },
+  { en: "You give each member a task." },
+  { en: "You consider members' opinions when you set the group goals." },
+  { en: "You have good manners and try to be a role model." },
+  { en: "You have a strong will when members disagree with you." },
+  { en: "You point out members' mistakes." },
+  { en: "You talk directly with each member." },
+  { en: "You listen to members' criticisms." },
+  { en: "You make members happy." },
+  { en: "You trust your group's members." }
+];
+
+const EVAL = [
+  { min:10, max:19, en:"Poor",      ja:"もう少し頑張ろう",   color:"#c0392b" },
+  { min:20, max:29, en:"So-so",     ja:"まあまあ",           color:"#c0782b" },
+  { min:30, max:39, en:"Good",      ja:"なかなか良い！",     color:"#2980b9" },
+  { min:40, max:50, en:"Excellent", ja:"素晴らしいリーダー！", color:"#1a6b5c" }
+];
+
+function getEval(total) {
+  return EVAL.find(e => total >= e.min && total <= e.max) || EVAL[0];
+}
+
+let answers = new Array(10).fill(null);
+let current = 0; // 0-9 = questions, 10 = result
+
+function render() {
+  const app = document.getElementById('app');
+  if (current < 10) renderQuestion(app);
+  else renderResult(app);
+}
+
+function renderQuestion(app) {
+  const q = questions[current];
+  const progress = (current / 10) * 100;
+  const selectedVal = answers[current];
+
+  app.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Question ${current+1} / 10　設問 ${current+1} / 10</span>
+        <span>${current * 10}%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+    </div>
+
+    <div class="card page">
+      <div class="q-number">Q${current+1} &nbsp;·&nbsp; If you lead a group, . . .</div>
+      <div class="q-text-en">${q.en}</div>
+
+      <div class="scale-labels">
+        <span>1 — Strongly disagree<br>全くそう思わない</span>
+        <span style="text-align:right">5 — Strongly agree<br>強くそう思う</span>
+      </div>
+      <div class="likert">
+        ${[1,2,3,4,5].map(v => `
+          <button class="likert-btn${selectedVal===v?' selected':''}" onclick="choose(${v})">${v}</button>
+        `).join('')}
+      </div>
+
+      <div class="nav">
+        ${current > 0 ? `<button class="btn btn-ghost" onclick="goBack()">← Back / 戻る</button>` : ''}
+        <button class="btn btn-primary" onclick="goNext()" ${selectedVal===null?'disabled':''}>
+          ${current < 9 ? 'Next / 次へ →' : 'See Results / 結果を見る'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderResult(app) {
+  const total = answers.reduce((a,b)=>a+b,0);
+  const ev = getEval(total);
+
+  // which segment is active?
+  const segments = EVAL.map((e, i) => {
+    const isActive = e.en === ev.en;
+    const segWidth = 100 / EVAL.length;
+    return { ...e, isActive, segWidth };
+  });
+
+  app.innerHTML = `
+    <div class="card page">
+      <div class="result-header">
+        <div class="result-title-en">How is your leadership?</div>
+        <div class="result-title-ja">あなたのリーダーシップはどれくらい？</div>
+      </div>
+
+      <div class="score-ring-wrap">
+        <div class="score-ring" style="border-color:${ev.color}; color:${ev.color}">
+          <div class="score-num">${total}</div>
+          <div class="score-denom">/ 50 points</div>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-bottom:6px">
+        <span class="eval-badge" style="background:${ev.color}">${ev.en}</span>
+      </div>
+      <div class="eval-ja">${ev.ja}</div>
+
+      <!-- eval scale bar -->
+      <div style="padding: 0 4px 36px;">
+        <div style="display:flex; gap:4px; margin-bottom:20px">
+          ${EVAL.map(e => `
+            <div style="flex:1; height:8px; border-radius:6px; background:${e.color}; opacity:${e.en===ev.en?1:0.25}; position:relative;">
+              ${e.en===ev.en ? `<div class="scale-indicator"></div>` : ''}
+              <div style="position:absolute; top:14px; left:50%; transform:translateX(-50%); font-size:10px; color:${e.color}; white-space:nowrap; font-weight:600">${e.en}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--muted); padding: 0 0px; margin-top: 26px;">
+          <span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>
+        </div>
+      </div>
+
+      <div class="score-breakdown">
+        <div class="breakdown-title">Score Breakdown / 各設問の得点</div>
+        ${questions.map((q, i) => `
+          <div class="breakdown-row">
+            <div class="breakdown-num">${i+1}</div>
+            <div class="breakdown-label">${q.en}</div>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar" style="width:${(answers[i]/5)*100}%"></div>
+            </div>
+            <div class="breakdown-score">${answers[i]}/5</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <button class="btn btn-primary btn-retry" onclick="retry()">Try Again / もう一度やる</button>
+    </div>
+  `;
+}
+
+function choose(val) {
+  answers[current] = val;
+  render();
+}
+
+function goNext() {
+  if (answers[current] === null) return;
+  current++;
+  render();
+}
+
+function goBack() {
+  if (current > 0) { current--; render(); }
+}
+
+function retry() {
+  answers = new Array(10).fill(null);
+  current = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
